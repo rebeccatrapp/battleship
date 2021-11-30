@@ -81,7 +81,6 @@ void shipPlacement(Ship tmp, int p){
         std::cin >> d >> x >> y;
     }
     if(p == computer){
-        srand(time(0));
         d = rand() % 2;
         x = rand() % 9;
         y = rand() % 9; 
@@ -106,6 +105,9 @@ void shipPlacement(Ship tmp, int p){
                     notoccupied = true;
                 }
             }
+            if(notoccupied == false){
+                    shipPlacement(tmp, computer);
+            }
         }
     }
     if(d == 1){
@@ -128,6 +130,9 @@ void shipPlacement(Ship tmp, int p){
                 }
                 notoccupied = true;
             }
+            if(notoccupied == false){
+                    shipPlacement(tmp, computer);
+            }
         }
     }
     if(notoccupied == false){
@@ -141,6 +146,9 @@ void shipPlacement(Ship tmp, int p){
     }
     if(p == player){
         PrintBoard(playerBoard, player);
+    }
+    if(p == computer){
+        PrintBoard(compBoard, computer);
     }
 }
 
@@ -172,21 +180,21 @@ void computerBoard(){
     Ship submarineC("Submarine", 3, 'S');
     Ship destroyerC("Destroyer", 2 ,'D');
     shipPlacement(aircraftCarrierC, computer);
-    srand(time(0));
     shipPlacement(battleShipC, computer);
+    std::cout << "test";
     shipPlacement(cruiserC, computer);
     shipPlacement(submarineC, computer);
     shipPlacement(destroyerC, computer);
 }
 
 int main(){
+    srand(time(0));
     //ResetBoard(playerBoard);
     ResetBoard(compBoard);
-    PrintBoard(compBoard, computer);
+    //PrintBoard(compBoard, computer);
     //PrintBoard(playerBoard, player);
     //setUpGame();
     computerBoard();
-    PrintBoard(compBoard, computer);
 
 
     return 0;
