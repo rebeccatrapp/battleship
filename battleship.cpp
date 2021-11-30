@@ -8,18 +8,27 @@ const int BOARD_HEIGHT = 9;
 const int player = 1; 
 const int computer = 2;
 const char water = '-';
+
+int playerScore = 0; 
+int compScore = 0;
+bool running = true;
+
 char playerBoard[BOARD_WIDTH][BOARD_HEIGHT]; 
 char compBoard[BOARD_WIDTH][BOARD_HEIGHT];
+char hitBoard[BOARD_WIDTH][BOARD_HEIGHT];
 
 enum DIRECTION {HORIZONTAL, VERTICAL};
 
 void PrintBoard(int player);
 void ResetBoard();
-void PlaceShips();
-void Attack();
-void GameOver();
-void loadShips();
 void shipPlacement();
+void instructions();
+void setupGame();
+void computerBoard();
+void checkWinner();
+void takeTurn();
+void computerTurn();
+void playGame();
 
 Ship::Ship(std::string name, int size, char tag){
     this->name = name;
@@ -99,15 +108,19 @@ void shipPlacement(Ship tmp, int p){
         if(p == computer){
             for(int i = 0; i < tmp.getShipSize(); i++){
                 if(compBoard[y-1][x+i-1] == water){
-                    for(int j = 0; j < tmp.getShipSize(); j++){
-                        compBoard[y-1][x+i-1] = tmp.getShipTag();
-                    }
                     notoccupied = true;
                 }
+                else notoccupied = false;
             }
             if(notoccupied == false){
-                    shipPlacement(tmp, computer);
+                shipPlacement(tmp, computer);
             }
+            else{
+                for(int j = 0; j < tmp.getShipSize(); j++){
+                    compBoard[y-1][x+j-1] = tmp.getShipTag();
+                }
+            }
+            
         }
     }
     if(d == 1){
@@ -123,16 +136,20 @@ void shipPlacement(Ship tmp, int p){
         }
         if(p == computer){
             for(int i = 0; i < tmp.getShipSize(); i++){
-                if(compBoard[y+i-1][x-1] == water){
-                    for(int j = 0; j < tmp.getShipSize(); j++){
-                        compBoard[y+i-1][x-1] = tmp.getShipTag();
-                    }
+                if(compBoard [y+i-1][x-1] == water){
+                    notoccupied = true;
                 }
-                notoccupied = true;
+                else notoccupied = false;
             }
             if(notoccupied == false){
-                    shipPlacement(tmp, computer);
+                shipPlacement(tmp, computer);
             }
+            else{
+                for(int j = 0; j < tmp.getShipSize(); j++){
+                    compBoard[y+j-1][x-1] = tmp.getShipTag();
+                }
+            }
+            
         }
     }
     if(notoccupied == false){
@@ -147,9 +164,9 @@ void shipPlacement(Ship tmp, int p){
     if(p == player){
         PrintBoard(playerBoard, player);
     }
-    if(p == computer){
-        PrintBoard(compBoard, computer);
-    }
+    //if(p == computer){
+     //   PrintBoard(compBoard, computer);
+    //}
 }
 
 void instructions(Ship a){
@@ -187,15 +204,72 @@ void computerBoard(){
     shipPlacement(destroyerC, computer);
 }
 
+void takeTurn(int p){
+    PrintBoard(playerBoard, player);
+    PrintBoard(hitBoard, 3);
+    int x, y;
+    std::cout << "Enter coordinates to attack" << std::endl;
+    std::cin >> x >> y;
+    std::cout << std::endl;
+    x -= 1; 
+    y -= 1;
+    if(compBoard[x][y] == water){
+        std::cout << "MISS" << std::endl;
+        hitBoard[x][y] = 'm'; 
+    }
+    if(compBoard[x][y] != water){
+        std::cout << "HIT" << std::endl; 
+        hitBoard[x][y] = '*';
+        playerScore += 1;
+    }
+}
+
+void computerTurn(){
+    int x, y;
+    x = (rand() % BOARD_WIDTH) - 1;
+    y = (rand() % BOARD_HEIGHT) - 1;
+    std::cout << "x : " << x << " y : " << y << std::endl;
+    if(playerBoard[x][y] == water){
+        std::cout << "Computer MISS" << std::endl;
+        playerBoard[x][y] = 'm'; 
+    }
+    if(playerBoard[x][y] != water){
+        std::cout << "Computer HIT" << std::endl; 
+        playerBoard[x][y] = '*';
+        compScore += 1;
+    }
+
+}
+
+void playGame(){ 
+    while(running){
+        takeTurn(player);
+        computerTurn();
+        checkWinner();
+    }
+}
+
+void checkWinner(){
+    if(playerScore == 17){
+        std::cout << "Player wins!!" << std::endl;
+        running = false;
+    }
+    if(compScore == 17){
+        std::cout << "Computer wins." << std::endl;
+        running = false;
+    }
+}
+
 int main(){
     srand(time(0));
-    //ResetBoard(playerBoard);
+    ResetBoard(playerBoard);
     ResetBoard(compBoard);
-    //PrintBoard(compBoard, computer);
-    //PrintBoard(playerBoard, player);
-    //setUpGame();
+    PrintBoard(playerBoard, player);
+    setUpGame();
     computerBoard();
-
+    ResetBoard(hitBoard);
+    PrintBoard(compBoard, computer);
+    playGame();
 
     return 0;
 }
