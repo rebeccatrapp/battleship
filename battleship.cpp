@@ -5,8 +5,10 @@
 
 const int BOARD_WIDTH = 9;
 const int BOARD_HEIGHT = 9;
-const char noship = '!';
-char board[BOARD_WIDTH][BOARD_HEIGHT]; 
+const int player = 1; 
+const int computer = 2;
+const char water = '-';
+char playerBoard[BOARD_WIDTH][BOARD_HEIGHT]; 
 char compBoard[BOARD_WIDTH][BOARD_HEIGHT];
 
 enum DIRECTION {HORIZONTAL, VERTICAL};
@@ -49,58 +51,97 @@ void Ship::setShipTag(){
     this->tag = tag;
 }
 
-void PrintBoard(){
+void PrintBoard(char b[BOARD_WIDTH][BOARD_HEIGHT], int p){
+    std::cout << "------BOARD " << p << "------  " << std::endl;
     std::cout << "   1 2 3 4 5 6 7 8 9 " << std::endl;
     for(int h=0; h<BOARD_HEIGHT; h++){
         for(int w=0; w<BOARD_WIDTH; w++){
             if (w==0) std::cout << h+1 << " ";
             if (w<10 && w==0) std::cout << " ";
-            std::cout << board[h][w] << " ";
+            std::cout << b[h][w] << " ";
             if(w == BOARD_WIDTH-1) std::cout << "\n";
         }
     }
 }
 
-void ResetBoard(){
+void ResetBoard(char b[BOARD_WIDTH][BOARD_HEIGHT]){
     for(int h = 0; h<BOARD_HEIGHT; h++){
         for(int w = 0; w<BOARD_WIDTH; w++){
-            board[h][w] = ' ';
-            //std::cout << board[h][w];
+            b[h][w] = water;
         }
     }
 }
 
-void shipPlacement(Ship tmp){
+void shipPlacement(Ship tmp, int p){
     int d;
     int x, y; 
-    std::cin >> d >> x >> y;
-    if(d = 0){
-        for(int i = 0; i < tmp.getShipSize(); i++){
-            board[y-1][x+i-1] = tmp.getShipTag();
-        }
-    }
-    if (d = 1){
-        for(int j = 0; j < tmp.getShipSize(); j++){
-            board[y+j-1][x-1] = tmp.getShipTag();
-        }
-    }
-    PrintBoard();
+    bool notoccupied = false;
 
-}
-
-void computerShipPlacement(int d, int y, int x, Ship tmp){
-    if(d = 0){
-        for(int i = 0; i < tmp.getShipSize(); i++){
-            compBoard[x+i-1][y-1] = tmp.getShipTag();
+    if(p == player){
+        std::cin >> d >> x >> y;
+    }
+    if(p == computer){
+        srand(time(0));
+        d = rand() % 2;
+        x = rand() % 9;
+        y = rand() % 9; 
+    }
+    if(d == 0){
+        if(p == player){
+            for(int i = 0; i < tmp.getShipSize(); i++){
+                if(playerBoard[y-1][x+i-1] == water){
+                    for(int j = 0; j < tmp.getShipSize(); j++){
+                        playerBoard[y-1][x+j-1] = tmp.getShipTag();
+                    }
+                    notoccupied = true;
+                }
+            }
+        }
+        if(p == computer){
+            for(int i = 0; i < tmp.getShipSize(); i++){
+                if(compBoard[y-1][x+i-1] == water){
+                    for(int j = 0; j < tmp.getShipSize(); j++){
+                        compBoard[y-1][x+i-1] = tmp.getShipTag();
+                    }
+                    notoccupied = true;
+                }
+            }
         }
     }
-    else if(d = 1){
-        std::cout << "blah1";
-        for(int j = 0; j < tmp.getShipSize(); j++){
-            compBoard[x-1][y+j-1] = tmp.getShipTag();
+    if(d == 1){
+        if(p == player){
+            for(int i = 0; i < tmp.getShipSize(); i++){
+                if(playerBoard[y+i-1][x-1] == water){
+                    for(int j = 0; j < tmp.getShipSize(); j++){
+                        playerBoard[y+i-1][x-1] = tmp.getShipTag();
+                    }
+                    notoccupied = true;
+                }
+            }
+        }
+        if(p == computer){
+            for(int i = 0; i < tmp.getShipSize(); i++){
+                if(compBoard[y+i-1][x-1] == water){
+                    for(int j = 0; j < tmp.getShipSize(); j++){
+                        compBoard[y+i-1][x-1] = tmp.getShipTag();
+                    }
+                }
+                notoccupied = true;
+            }
         }
     }
-    else return;
+    if(notoccupied == false){
+        if(p==player){
+            std::cout << "Invalid Placement. Try again" << std::endl;
+            shipPlacement(tmp, player);
+        }
+        if(p==computer){
+            shipPlacement(tmp, computer);
+        }
+    }
+    if(p == player){
+        PrintBoard(playerBoard, player);
+    }
 }
 
 void instructions(Ship a){
@@ -108,9 +149,7 @@ void instructions(Ship a){
     std::cout << instructions << std::endl;
     std::cout << "Ship to place: " << a.getShipName() << " which has a length of " << a.getShipSize() << std::endl;
     std::cout << "Where do you want to place it?" << std::endl; 
-    shipPlacement(a);
-    
-
+    shipPlacement(a, player);
 }
 
 void setUpGame(){
@@ -132,38 +171,22 @@ void computerBoard(){
     Ship cruiserC("Cruiser", 3, 'C');
     Ship submarineC("Submarine", 3, 'S');
     Ship destroyerC("Destroyer", 2 ,'D');
-
-    for(int h = 0; h<BOARD_HEIGHT; h++){
-        for(int w = 0; w<BOARD_WIDTH; w++){
-            compBoard[h][w] = ' ';
-            //std::cout << compBoard[h][w];
-        }
-    }
-
-    computerShipPlacement(0, 1, 5, aircraftCarrierC);
-    computerShipPlacement(0, 7, 9, battleShipC);
-    computerShipPlacement(1, 2, 1, cruiserC);
-    computerShipPlacement(1, 7, 4, submarineC);
-    computerShipPlacement(1, 1, 7, destroyerC);
-    
-    std::cout << "   1 2 3 4 5 6 7 8 9 " << std::endl;
-    for(int h=0; h<BOARD_HEIGHT; h++){
-        for(int w=0; w<BOARD_WIDTH; w++){
-            if (w==0) std::cout << h+1 << " ";
-            if (w<10 && w==0) std::cout << " ";
-            std::cout << compBoard[h][w] << " ";
-            if(w == BOARD_WIDTH-1) std::cout << "\n";
-        }
-    }
-
-    
+    shipPlacement(aircraftCarrierC, computer);
+    srand(time(0));
+    shipPlacement(battleShipC, computer);
+    shipPlacement(cruiserC, computer);
+    shipPlacement(submarineC, computer);
+    shipPlacement(destroyerC, computer);
 }
 
 int main(){
-    ResetBoard();
-    PrintBoard();
-    setUpGame();
-    //computerBoard();
+    //ResetBoard(playerBoard);
+    ResetBoard(compBoard);
+    PrintBoard(compBoard, computer);
+    //PrintBoard(playerBoard, player);
+    //setUpGame();
+    computerBoard();
+    PrintBoard(compBoard, computer);
 
 
     return 0;
