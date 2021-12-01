@@ -3,16 +3,33 @@
 
 #include <string> 
 
+class GamePlay{
+    void PrintBoard(int player);
+    void ResetBoard();
+    void shipPlacement();
+    void instructions();
+    void setupGame();
+    void computerBoard();
+    void checkWinner();
+    void takeTurn();
+    void computerTurn();
+    void playGame();
+};
+
 class Board{
     public: 
     //constructor
         Board();
+        Board(int width, int height);
     //getters
         std::string getBoardWidth();
         std::string getBoardHeight();
     //setters
-        void setBoardWidth(int width);
-        void setBoardHeight(int height);
+        void setBoardWidth(int x);
+        void setBoardHeight(int y);
+
+        int width;
+        int height;
 
 };
 
